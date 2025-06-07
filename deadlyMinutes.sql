@@ -10,5 +10,5 @@ select
     count(*) as num_kills
 From time_pos
 group by time
-order by num_kills desc
+order by time asc
 

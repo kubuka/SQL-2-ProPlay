@@ -8,17 +8,6 @@ where
     time IS NOT NULL)
 
 SELECT 
-    /*victim_list.victim_trunc,
-    ll.blueTop,
-    ll.blueJungle,
-    ll.blueMiddle,
-    ll.blueADC,
-    ll.blueSupport,
-    ll.redTop,
-    ll.redJungle,
-    ll.redMiddle,
-    ll.redADC,
-    ll.redSupport,*/
     count(*) as TotalKills,
     ROUND((count(*)/sum(count(*)) OVER())*100,2) as total_percent,
     CASE
