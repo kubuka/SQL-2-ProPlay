@@ -4,7 +4,7 @@ This project is all about diving deep into pro League of Legends match data from
 # 📝Scripts Overview
 1. [Most Effective Bot Lane Combination](#most-effective-bot-lane-combination)
 2. [Position Most Frequently Dying for First Blood](#position-most-frequently-dying-for-first-blood)
-3. [Frequency of Perfect Games]
+3. [Frequency of Perfect Games](#frequency-of-perfect-games)
 4. [Player with Most Gold Per Minute]
 5. [Player with Most Unique Champions on a Role in a Season]
 6. [Most "Deadly" Minutes in a Match]
