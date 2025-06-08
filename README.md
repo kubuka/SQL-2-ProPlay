@@ -141,144 +141,11 @@ FROM prefect_list;
 Perfect games are incredibly rare in pro play, happening in less than 0.5% of matches (just 37 games out of the entire dataset!). This really shows how high-level League of Legends games are almost always a back-and-forth struggle, and achieving a perfect win against other pros is a monumental feat!
 
 ## Player with Most Gold Per Minute
-This script (`goldEarned.sql`) aims to identify which pro players had the most explosive gold income in a single minute during a match. It aggregates gold data for every player across all matches and then calculates the largest single-minute gold spike to highlight players who could rapidly snowball their advantage.
+This script (`goldEarned.sql`) aims to identify which pro players had the most explosive gold income in a single minute during a match. It aggregates gold data for every player across all matches and then calculates the largest single-minute gold spike to highlight players who could rapidly snowball their advantage (`player_gold_data.sql` view used).
 
 ### SQL
 ```sql
-WITH player_gold_data as (
-    SELECT
-        ll.address AS Address,
-        ll.year,
-        ll.Season,
-        ll.blueTopChamp as champ,
-        ll.blueTop AS Player,
-        ll.goldblueTop AS GoldEarned
-    FROM
-        leagueoflegends ll
-    WHERE
-        ll.blueTop IS NOT NULL
-        AND ll.goldblueTop IS NOT NULL
-    UNION ALL
-    SELECT
-        ll.address AS Address,
-        ll.year,
-        ll.Season,
-        ll.blueJungleChamp as champ,
-        ll.blueJungle AS Player,
-        ll.goldblueJungle AS GoldEarned
-    FROM
-        leagueoflegends ll
-    WHERE
-        ll.blueJungle IS NOT NULL
-        AND ll.goldblueJungle IS NOT NULL
-    UNION ALL
-    SELECT
-        ll.address AS Address,
-        ll.year,
-        ll.Season,
-        ll.blueMiddleChamp as champ,
-        ll.blueMiddle AS Player,
-        ll.goldblueMiddle AS GoldEarned
-    FROM
-        leagueoflegends ll
-    WHERE
-        ll.blueMiddle IS NOT NULL
-        AND ll.goldblueMiddle IS NOT NULL
-    UNION ALL
-    SELECT
-        ll.address AS Address,
-        ll.year,
-        ll.Season,
-        ll.blueADCChamp as champ,
-        ll.blueADC AS Player,
-        ll.goldblueADC AS GoldEarned
-    FROM
-        leagueoflegends ll
-    WHERE
-        ll.blueADC IS NOT NULL
-        AND ll.goldblueADC IS NOT NULL
-    UNION ALL
-    SELECT
-        ll.address AS Address,
-        ll.year,
-        ll.Season,
-        ll.blueSupportChamp as champ,
-        ll.blueSupport AS Player,
-        ll.goldblueSupport AS GoldEarned
-    FROM
-        leagueoflegends ll
-    WHERE
-        ll.blueSupport IS NOT NULL
-        AND ll.goldblueSupport IS NOT NULL
-    UNION ALL
-    SELECT
-        ll.address AS Address,
-        ll.year,
-        ll.Season,
-        ll.redTopChamp as champ,
-        ll.redTop AS Player,
-        ll.goldredTop AS GoldEarned
-    FROM
-        leagueoflegends ll
-    WHERE
-        ll.redTop IS NOT NULL
-        AND ll.goldredTop IS NOT NULL
-    UNION ALL
-    SELECT
-        ll.address AS Address,
-        ll.year,
-        ll.Season,
-        ll.redJungleChamp as champ,
-        ll.redJungle AS Player,
-        ll.goldredJungle AS GoldEarned
-    FROM
-        leagueoflegends ll
-    WHERE
-        ll.redJungle IS NOT NULL
-        AND ll.goldredJungle IS NOT NULL
-    UNION ALL
-    SELECT
-        ll.address AS Address,
-        ll.year,
-        ll.Season,
-        ll.redMiddleChamp as champ,
-        ll.redMiddle AS Player,
-        ll.goldredMiddle AS GoldEarned
-    FROM
-        leagueoflegends ll
-    WHERE
-        ll.redMiddle IS NOT NULL
-        AND ll.goldredMiddle IS NOT NULL
-    UNION ALL
-    SELECT
-        ll.address AS Address,
-        ll.year,
-        ll.Season,
-        ll.redADCChamp as champ,
-        ll.redADC AS Player,
-        ll.goldredADC AS GoldEarned
-    FROM
-        leagueoflegends ll
-    WHERE
-        ll.redADC IS NOT NULL
-        AND ll.goldredADC IS NOT NULL
-    UNION ALL
-    SELECT
-        ll.address AS Address,
-        ll.year,
-        ll.Season,
-        ll.redSupportChamp as champ,
-        ll.redSupport AS Player,
-        ll.redSupport AS Player,
-        ll.goldredSupport AS GoldEarned
-    FROM
-        leagueoflegends ll
-    WHERE
-        ll.redSupport IS NOT NULL
-        AND ll.goldredSupport IS NOT NULL
-),
-
-gold_per_minute as (
+with gold_per_minute as (
     SELECT
         Address,
         player_gold_data.year,
@@ -323,132 +190,10 @@ LIMIT 100;
 It's fascinating to see players like Smeb (Hecarim) and Froggen (Azir) pulling in massive amounts of gold in a single minute, with Smeb hitting a peak of 2668 gold! This shows how some pros, particularly on specific champions, could have explosive power spikes by rapidly accumulating resources, often through clutch plays or dominating teamfights.
 
 ## Player with Most Unique Champions
-This script (`uniquePlayer.sql`) identifies which pro players showcased the widest champion pools on a single role within a given season. It aggregates data for every player, counting distinct champions played on each of their roles, giving us a look at the most versatile pros.
+This script (`uniquePlayer.sql`) identifies which pro players showcased the widest champion pools on a single role within a given season. It aggregates data for every player, counting distinct champions played on each of their roles, giving us a look at the most versatile pros (`player_champion_role_data.sql` view used).
 
 ### SQL
 ``` sql
-WITH player_champion_role_data AS (
-    SELECT
-        ll.address AS Address,
-        ll.year,
-        ll.season AS Season,
-        ll.blueTop AS Player,
-        ll.bluetopchamp AS Champion,
-        'Top' AS Role
-    FROM
-        leagueoflegends ll
-    WHERE
-        ll.blueTop IS NOT NULL AND ll.blueTopChamp IS NOT NULL
-    UNION ALL
-    SELECT
-        ll.address AS Address,
-        ll.year,
-        ll.season AS Season,
-        ll.blueJungle AS Player,
-        ll.blueJungleChamp AS Champion,
-        'Jungle' AS Role
-    FROM
-        leagueoflegends ll
-    WHERE
-        ll.blueJungle IS NOT NULL AND ll.blueJungleChamp IS NOT NULL
-    UNION ALL
-    SELECT
-        ll.address AS Address,
-        ll.year,
-        ll.season AS Season,
-        ll.blueMiddle AS Player,
-        ll.blueMiddleChamp AS Champion,
-        'Middle' AS Role
-    FROM
-        leagueoflegends ll
-    WHERE
-        ll.blueMiddle IS NOT NULL AND ll.blueMiddleChamp IS NOT NULL
-    UNION ALL
-    SELECT
-        ll.address AS Address,
-        ll.year,
-        ll.season AS Season,
-        ll.blueADC AS Player,
-        ll.blueADCChamp AS Champion,
-        'ADC' AS Role
-    FROM
-        leagueoflegends ll
-    WHERE
-        ll.blueADC IS NOT NULL AND ll.blueADCChamp IS NOT NULL
-    UNION ALL
-    SELECT
-        ll.address AS Address,
-        ll.year,
-        ll.season AS Season,
-        ll.blueSupport AS Player,
-        ll.blueSupportChamp AS Champion,
-        'Support' AS Role
-    FROM
-        leagueoflegends ll
-    WHERE
-        ll.blueSupport IS NOT NULL AND ll.blueSupportChamp IS NOT NULL
-    UNION ALL
-    SELECT
-        ll.address AS Address,
-        ll.year,
-        ll.season AS Season,
-        ll.redTop AS Player,
-        ll.redTopChamp AS Champion,
-        'Top' AS Role
-    FROM
-        leagueoflegends ll
-    WHERE
-        ll.redTop IS NOT NULL AND ll.redTopChamp IS NOT NULL
-    UNION ALL
-    SELECT
-        ll.address AS Address,
-        ll.year,
-        ll.season AS Season,
-        ll.redJungle AS Player,
-        ll.redJungleChamp AS Champion,
-        'Jungle' AS Role
-    FROM
-        leagueoflegends ll
-    WHERE
-        ll.redJungle IS NOT NULL AND ll.redJungleChamp IS NOT NULL
-    UNION ALL
-    SELECT
-        ll.address AS Address,
-        ll.year,
-        ll.season AS Season,
-        ll.redMiddle AS Player,
-        ll.redMiddleChamp AS Champion,
-        'Middle' AS Role
-    FROM
-        leagueoflegends ll
-    WHERE
-        ll.redMiddle IS NOT NULL AND ll.redMiddleChamp IS NOT NULL
-    UNION ALL
-    SELECT
-        ll.address AS Address,
-        ll.year,
-        ll.season AS Season,
-        ll.redADC AS Player,
-        ll.redADCChamp AS Champion,
-        'ADC' AS Role
-    FROM
-        leagueoflegends ll
-    WHERE
-        ll.redADC IS NOT NULL AND ll.redADCChamp IS NOT NULL
-    UNION ALL
-    SELECT
-        ll.address AS Address,
-        ll.year,
-        ll.season AS Season,
-        ll.redSupport AS Player,
-        ll.redSupportChamp AS Champion,
-        'Support' AS Role
-    FROM
-        leagueoflegends ll
-    WHERE
-        ll.redSupport IS NOT NULL AND ll.redSupportChamp IS NOT NULL
-)
-
 SELECT
     year ||' ' || season AS YearSeason,
     Player,
@@ -709,47 +454,10 @@ And here's the gold difference between Blue Team and Red Team for each role:
 This data clearly shows how gold income progresses differently across roles in pro games. ADCs and Mid laners generally accumulate the most gold, especially as the game progresses (e.g., reaching over 11,000 gold by 30 minutes), reflecting their scaling carry potential. You can actually see that the Blue Team usually has a bit more gold on average. The main reason for that seems to be that their win rate is just a tiny bit higher than 50%.
 
 ## Typical Ban Order
-This script (`banSequence.sql`) analyzes the ban phases in professional League of Legends matches to determine the most common champions banned at each stage. It aggregates ban data by year, season, team, and ban order (1st to 5th ban), revealing insights into evolving pro-play strategies and champion priority.
+This script (`banSequence.sql`) analyzes the ban phases in professional League of Legends matches to determine the most common champions banned at each stage. It aggregates ban data by year, season, team, and ban order (1st to 5th ban), revealing insights into evolving pro-play strategies and champion priority (`ban_list.sql` view used).
 
 ### SQL
 ```sql
-WITH ban_list as (
-    SELECT
-        address,
-        team as team,
-        ban_1 as bans,
-        1 as ban_order
-    From bans
-    UNION ALL
-    SELECT
-        address,
-        team as team,
-        ban_2 as bans,
-        2 as ban_order
-    From bans
-    UNION ALL
-    SELECT
-        address,
-        team as team,
-        ban_3 as bans,
-        3 as ban_order
-    From bans
-    UNION ALL
-    SELECT
-        address,
-        team as team,
-        ban_4 as bans,
-        4 as ban_order
-    From bans
-    UNION ALL
-    SELECT
-        address,
-        team as team,
-        ban_5 as bans,
-        5 as ban_order
-    From bans
-)
-
 SELECT
     ll.year,
     ll.season,
@@ -896,7 +604,7 @@ I tried digging up a database or API with all the team names and their tags, but
 Teams like Team Yuhi (TY) and Team Coast (COW) show impressive "snowball efficiency," finishing games on average just 12.5 and 13.0 minutes after the 15-minute mark, respectively. This indicates their ability to quickly convert early advantages into decisive victories, showcasing strong mid-game coordination and execution. Samsung White (SSW) also appears high on the list, reinforcing their reputation as a highly efficient and dominant team.
 
 ## Teams Winning Throughout a Season
-This script (winning_teams_per_season.sql) identifies professional teams that went undefeated for an entire season (Spring or Summer). It checks if a team's total games played equals their total wins within a specific season, highlighting truly dominant performances.
+This script (`winstreak.sql`) identifies professional teams that went undefeated for an entire season. It checks if a team's total games played equals their total wins within a specific season, highlighting truly dominant performances.
 
 ### SQL
 ```sql
@@ -987,3 +695,301 @@ This project was a fantastic opportunity to deepen my SQL skills, particularly w
 - **Understanding Esports Analytics**: Gained a deeper appreciation for the granular data available in esports and how it can be used to dissect game strategy, player performance, and meta shifts.
 
 Overall, this project significantly enhanced my ability to query, analyze, and interpret large datasets, providing valuable experience in drawing actionable insights from complex structured data.
+
+## VIEWS
+
+## player_gold_data.sql
+```sql
+CREATE VIEW player_gold_data as SELECT
+    ll.address AS Address,
+    ll.year,
+    ll.Season,
+    ll.blueTopChamp as champ,
+    ll.blueTop AS Player,
+    ll.goldblueTop AS GoldEarned
+FROM
+    leagueoflegends ll
+WHERE
+    ll.blueTop IS NOT NULL
+    AND ll.goldblueTop IS NOT NULL
+UNION ALL
+SELECT
+    ll.address AS Address,
+        ll.year,
+    ll.Season,
+    ll.blueJungleChamp as champ,
+    ll.blueJungle AS Player,
+    ll.goldblueJungle AS GoldEarned
+FROM
+    leagueoflegends ll
+WHERE
+    ll.blueJungle IS NOT NULL
+    AND ll.goldblueJungle IS NOT NULL
+UNION ALL
+SELECT
+ll.address AS Address,
+    ll.year,
+    ll.Season,
+    ll.blueMiddleChamp as champ,
+    ll.blueMiddle AS Player,
+    ll.goldblueMiddle AS GoldEarned
+FROM
+    leagueoflegends ll
+WHERE
+    ll.blueMiddle IS NOT NULL
+    AND ll.goldblueMiddle IS NOT NULL
+UNION ALL
+SELECT
+ll.address AS Address,
+    ll.year,
+    ll.Season,
+    ll.blueADCChamp as champ,
+    ll.blueADC AS Player,
+    ll.goldblueADC AS GoldEarned
+FROM
+    leagueoflegends ll
+WHERE
+    ll.blueADC IS NOT NULL
+    AND ll.goldblueADC IS NOT NULL
+UNION ALL
+SELECT
+ll.address AS Address,
+    ll.year,
+    ll.Season,
+    ll.blueSupportChamp as champ,
+    ll.blueSupport AS Player,
+    ll.goldblueSupport AS GoldEarned
+FROM
+    leagueoflegends ll
+WHERE
+    ll.blueSupport IS NOT NULL
+    AND ll.goldblueSupport IS NOT NULL
+UNION ALL
+SELECT
+ll.address AS Address,
+    ll.year,
+    ll.Season,
+    ll.redTopChamp as champ,
+    ll.redTop AS Player,
+    ll.goldredTop AS GoldEarned
+FROM
+    leagueoflegends ll
+WHERE
+    ll.redTop IS NOT NULL
+    AND ll.goldredTop IS NOT NULL
+UNION ALL
+SELECT
+ll.address AS Address,
+    ll.year,
+    ll.Season,
+    ll.redJungleChamp as champ,
+    ll.redJungle AS Player,
+    ll.goldredJungle AS GoldEarned
+FROM
+    leagueoflegends ll
+WHERE
+    ll.redJungle IS NOT NULL
+    AND ll.goldredJungle IS NOT NULL
+UNION ALL
+SELECT
+ll.address AS Address,
+    ll.year,
+    ll.Season,
+    ll.redMiddleChamp as champ,
+    ll.redMiddle AS Player,
+    ll.goldredMiddle AS GoldEarned
+FROM
+    leagueoflegends ll
+WHERE
+
+    ll.redMiddle IS NOT NULL
+    AND ll.goldredMiddle IS NOT NULL
+UNION ALL
+SELECT
+ll.address AS Address,
+    ll.year,
+    ll.Season,
+    ll.redADCChamp as champ,
+    ll.redADC AS Player,
+    ll.goldredADC AS GoldEarned
+FROM
+    leagueoflegends ll
+WHERE
+    ll.redADC IS NOT NULL
+    AND ll.goldredADC IS NOT NULL
+UNION ALL
+SELECT
+ll.address AS Address,
+    ll.year,
+    ll.Season,
+    ll.redSupportChamp as champ,
+    ll.redSupport AS Player,
+    ll.goldredSupport AS GoldEarned
+FROM
+    leagueoflegends ll
+WHERE
+    ll.redSupport IS NOT NULL
+    AND ll.goldredSupport IS NOT NULL;
+```
+## player_champion_role_data.sql
+```sql
+CREATE VIEW player_champion_role_data AS 
+    SELECT
+        ll.address AS Address,
+        ll.year,
+        ll.season AS Season, 
+        ll.blueTop AS Player,
+        ll.bluetopchamp AS Champion, 
+        'Top' AS Role
+    FROM
+        leagueoflegends ll
+    WHERE
+        ll.blueTop IS NOT NULL AND ll.blueTopChamp IS NOT NULL
+    UNION ALL
+    SELECT
+        ll.address AS Address,
+        ll.year,
+        ll.season AS Season,
+        ll.blueJungle AS Player,
+        ll.blueJungleChamp AS Champion,
+        'Jungle' AS Role
+    FROM
+        leagueoflegends ll
+    WHERE
+        ll.blueJungle IS NOT NULL AND ll.blueJungleChamp IS NOT NULL
+    UNION ALL
+    SELECT
+        ll.address AS Address,
+        ll.year,
+        ll.season AS Season,
+        ll.blueMiddle AS Player,
+        ll.blueMiddleChamp AS Champion,
+        'Middle' AS Role
+    FROM
+        leagueoflegends ll
+    WHERE
+        ll.blueMiddle IS NOT NULL AND ll.blueMiddleChamp IS NOT NULL
+    UNION ALL
+    SELECT
+        ll.address AS Address,
+        ll.year,
+        ll.season AS Season,
+        ll.blueADC AS Player,
+        ll.blueADCChamp AS Champion,
+        'ADC' AS Role
+    FROM
+        leagueoflegends ll
+    WHERE
+        ll.blueADC IS NOT NULL AND ll.blueADCChamp IS NOT NULL
+    UNION ALL
+    SELECT
+        ll.address AS Address,
+        ll.year,
+        ll.season AS Season,
+        ll.blueSupport AS Player,
+        ll.blueSupportChamp AS Champion,
+        'Support' AS Role
+    FROM
+        leagueoflegends ll
+    WHERE
+        ll.blueSupport IS NOT NULL AND ll.blueSupportChamp IS NOT NULL
+    UNION ALL
+    SELECT
+        ll.address AS Address,
+        ll.year,
+        ll.season AS Season,
+        ll.redTop AS Player,
+        ll.redTopChamp AS Champion,
+        'Top' AS Role
+    FROM
+        leagueoflegends ll
+    WHERE
+        ll.redTop IS NOT NULL AND ll.redTopChamp IS NOT NULL
+    UNION ALL
+    SELECT
+        ll.address AS Address,
+        ll.year,
+        ll.season AS Season,
+        ll.redJungle AS Player,
+        ll.redJungleChamp AS Champion,
+        'Jungle' AS Role
+    FROM
+        leagueoflegends ll
+    WHERE
+        ll.redJungle IS NOT NULL AND ll.redJungleChamp IS NOT NULL
+    UNION ALL
+    SELECT
+        ll.address AS Address,
+        ll.year,
+        ll.season AS Season,
+        ll.redMiddle AS Player,
+        ll.redMiddleChamp AS Champion,
+        'Middle' AS Role
+    FROM
+        leagueoflegends ll
+    WHERE
+        ll.redMiddle IS NOT NULL AND ll.redMiddleChamp IS NOT NULL
+    UNION ALL
+    SELECT
+        ll.address AS Address,
+        ll.year,
+        ll.season AS Season,
+        ll.redADC AS Player,
+        ll.redADCChamp AS Champion,
+        'ADC' AS Role
+    FROM
+        leagueoflegends ll
+    WHERE
+        ll.redADC IS NOT NULL AND ll.redADCChamp IS NOT NULL
+    UNION ALL
+    SELECT
+        ll.address AS Address,
+        ll.year,
+        ll.season AS Season,
+        ll.redSupport AS Player,
+        ll.redSupportChamp AS Champion,
+        'Support' AS Role
+    FROM
+        leagueoflegends ll
+    WHERE
+        ll.redSupport IS NOT NULL AND ll.redSupportChamp IS NOT NULL
+
+```
+## ban_list.sql
+```sql
+CREATE VIEW ban_list as select 
+    address,
+    team as team,
+    ban_1 as bans,
+    1 as ban_order
+From bans
+UNION ALL
+select 
+    address,
+    team as team,
+    ban_2 as bans,
+    2 as ban_order
+From bans
+UNION ALL
+select 
+    address,
+    team as team,
+    ban_3 as bans,
+    3 as ban_order
+From bans
+UNION ALL
+select 
+    address,
+    team as team,
+    ban_4 as bans,
+    4 as ban_order
+From bans
+UNION ALL
+select 
+    address,
+    team as team,
+    ban_5 as bans,
+    5 as ban_order
+From bans
+
+```
