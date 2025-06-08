@@ -14,6 +14,9 @@ This project is all about diving deep into pro League of Legends match data from
 10. [Teams Best at Snowball](#teams-best-at-snowball)
 11. [Teams Winning Throughout a Season](#teams-winning-throughout-a-season)
 
+12. [Summary](#summary)
+
+
 ## Most Effective Bot Lane Combination
 
 This script (`bottomCombinations.sql`) digs into professional matches to find out which champion duos in the bot lane (ADC and Support) had the highest win rates. It pulls data from both blue and red teams, combines them, and then calculates the win rate for each unique pair. To keep things statistically significant, it only considers combinations that appeared in more than 20 games.
@@ -297,7 +300,7 @@ def zaznacz_punkt_na_mapie(csv_file, map_width, map_height, file_name = "mapa_z_
         to_draw = len(df)
     else: to_draw = df.head(dots)
 
-    obraz = Image.open('/Users/kuba/Desktop/Portfolio/SQL-2-ProPlay/lol_map.jpg')
+    obraz = Image.open('lol_map.jpg')
     
     rysuj = ImageDraw.Draw(obraz)
     for i, row in enumerate(to_draw.itertuples()):
@@ -322,7 +325,7 @@ def zaznacz_punkt_na_mapie(csv_file, map_width, map_height, file_name = "mapa_z_
 
 szerokosc = 800
 wysokosc = 800
-csv_file = '/Users/kuba/Desktop/Portfolio/SQL-2-ProPlay/deathPositions.csv'
+csv_file = 'deathPositions.csv'
 
 zaznacz_punkt_na_mapie(csv_file,szerokosc, wysokosc)
 ```
@@ -425,7 +428,7 @@ After retrieving the average gold data from the database, I further processed it
 ```python
 import pandas as pd
 
-df = pd.read_csv('/Users/kuba/Desktop/Portfolio/SQL-2-ProPlay/position_gold_minute.csv')
+df = pd.read_csv('position_gold_minute.csv')
 print(df.columns)
 df_index = df.set_index('type')
 diff_cols = df_index.columns
@@ -438,7 +441,7 @@ diff.loc['midDiff'] = df_index.loc['goldblueMiddle', diff_cols] - df_index.loc['
 diff.loc['topDiff'] = df_index.loc['goldblueTop', diff_cols] - df_index.loc['goldredTop', diff_cols]
 
 print(diff)
-diff.to_csv('/Users/kuba/Desktop/Portfolio/SQL-2-ProPlay/position_gold_minute_diff.csv', index=True)
+diff.to_csv('position_gold_minute_diff.csv', index=True)
 ```
 And here's the gold difference between Blue Team and Red Team for each role:
 
@@ -490,7 +493,7 @@ While the SQL query aggregates ban data, a further Python script was developed t
 ```python
 import pandas as pd
 
-df = pd.read_csv('/Users/kuba/Desktop/Portfolio/SQL-2-ProPlay/ban_order.csv')
+df = pd.read_csv('ban_order.csv')
 
 unique_bans_per_team = df.groupby(['year', 'season','team','bans'])['ban_percentage'].max().reset_index()
 top_5_unique_bans_per_team = unique_bans_per_team.groupby(['year', 'season', 'team']).apply(
@@ -662,334 +665,28 @@ ORDER by games_played desc;
 ***💡Insights:***
 It's super interesting to see teams like SUP in 2018 Spring manage to go undefeated for 5 games! While these streaks might not represent full seasons (as the dataset might not contain all games for all teams), it highlights instances of absolute dominance within a given set of matches. Finding teams that consistently win, even for shorter periods, shows their high level of play and strategic strength during those specific seasons.
 
-## 📊 Project Summary
+## Summary
+
+### 📊 Project Summary
 This project delved into professional League of Legends match data from 2014-2018, leveraging SQL with PostgreSQL to extract meaningful insights. We explored various aspects of pro play, including:
 
 - **Champion Synergies**: Identifying highly effective bot lane champion combinations with impressive win rates (e.g., Twitch and Janna at 76.92%).
-
 - **Early Game Dynamics**: Analyzing first blood occurrences, revealing that Top lane players were most frequently the initial casualties (28.07%).
-
 - **Game Dominance**: Quantifying the rarity of "perfect games," which occurred in less than 0.5% of matches, highlighting the competitive nature of pro play.
-
 - **Player Economy**: Pinpointing moments of explosive gold income for individual players and tracking average gold progression across different roles.
-
 - **Strategic Adaptations**: Examining ban priorities by season and team, showcasing how strategies evolved over time.
-
 - **Game Pace & Efficiency**: Identifying teams highly proficient in snowballing advantages into quick victories.
-
 - **Map Hotspots**: Visualizing the most "deadly" areas on the map, confirming that objectives and mid lane are key battlegrounds.
 
 These analyses provide a comprehensive overview of strategic trends, player performance metrics, and the evolving meta in professional League of Legends over a significant period.
 
-## 🧠 What I Learned
+### 🧠 What I Learned
 This project was a fantastic opportunity to deepen my SQL skills, particularly with advanced PostgreSQL features. I gained hands-on experience in:
-
- - **Complex Query Construction**: Writing intricate WITH clauses (CTEs), using UNION ALL for data aggregation, and applying window functions like ROW_NUMBER() and LAG() for sequential analysis.
-
-- **Data Transformation**: Mastering string manipulation functions (substring, replace, trim, string_to_array) to clean and prepare raw data for analysis.
-
-- **Insightful Aggregations**: Effectively using COUNT(DISTINCT), SUM, and AVG with GROUP BY and OVER (PARTITION BY) to derive meaningful statistics.
-
-- **Data Visualization Concepts**: Understanding how SQL results can be translated into visual insights, even when the visualization itself is handled by a separate tool (like the Python script for map plotting). This reinforced the importance of data formatting for external tools.
-
-- **Understanding Esports Analytics**: Gained a deeper appreciation for the granular data available in esports and how it can be used to dissect game strategy, player performance, and meta shifts.
-
-Overall, this project significantly enhanced my ability to query, analyze, and interpret large datasets, providing valuable experience in drawing actionable insights from complex structured data.
-
-## VIEWS
-
-## player_gold_data.sql
-```sql
-CREATE VIEW player_gold_data as SELECT
-    ll.address AS Address,
-    ll.year,
-    ll.Season,
-    ll.blueTopChamp as champ,
-    ll.blueTop AS Player,
-    ll.goldblueTop AS GoldEarned
-FROM
-    leagueoflegends ll
-WHERE
-    ll.blueTop IS NOT NULL
-    AND ll.goldblueTop IS NOT NULL
-UNION ALL
-SELECT
-    ll.address AS Address,
-        ll.year,
-    ll.Season,
-    ll.blueJungleChamp as champ,
-    ll.blueJungle AS Player,
-    ll.goldblueJungle AS GoldEarned
-FROM
-    leagueoflegends ll
-WHERE
-    ll.blueJungle IS NOT NULL
-    AND ll.goldblueJungle IS NOT NULL
-UNION ALL
-SELECT
-ll.address AS Address,
-    ll.year,
-    ll.Season,
-    ll.blueMiddleChamp as champ,
-    ll.blueMiddle AS Player,
-    ll.goldblueMiddle AS GoldEarned
-FROM
-    leagueoflegends ll
-WHERE
-    ll.blueMiddle IS NOT NULL
-    AND ll.goldblueMiddle IS NOT NULL
-UNION ALL
-SELECT
-ll.address AS Address,
-    ll.year,
-    ll.Season,
-    ll.blueADCChamp as champ,
-    ll.blueADC AS Player,
-    ll.goldblueADC AS GoldEarned
-FROM
-    leagueoflegends ll
-WHERE
-    ll.blueADC IS NOT NULL
-    AND ll.goldblueADC IS NOT NULL
-UNION ALL
-SELECT
-ll.address AS Address,
-    ll.year,
-    ll.Season,
-    ll.blueSupportChamp as champ,
-    ll.blueSupport AS Player,
-    ll.goldblueSupport AS GoldEarned
-FROM
-    leagueoflegends ll
-WHERE
-    ll.blueSupport IS NOT NULL
-    AND ll.goldblueSupport IS NOT NULL
-UNION ALL
-SELECT
-ll.address AS Address,
-    ll.year,
-    ll.Season,
-    ll.redTopChamp as champ,
-    ll.redTop AS Player,
-    ll.goldredTop AS GoldEarned
-FROM
-    leagueoflegends ll
-WHERE
-    ll.redTop IS NOT NULL
-    AND ll.goldredTop IS NOT NULL
-UNION ALL
-SELECT
-ll.address AS Address,
-    ll.year,
-    ll.Season,
-    ll.redJungleChamp as champ,
-    ll.redJungle AS Player,
-    ll.goldredJungle AS GoldEarned
-FROM
-    leagueoflegends ll
-WHERE
-    ll.redJungle IS NOT NULL
-    AND ll.goldredJungle IS NOT NULL
-UNION ALL
-SELECT
-ll.address AS Address,
-    ll.year,
-    ll.Season,
-    ll.redMiddleChamp as champ,
-    ll.redMiddle AS Player,
-    ll.goldredMiddle AS GoldEarned
-FROM
-    leagueoflegends ll
-WHERE
-
-    ll.redMiddle IS NOT NULL
-    AND ll.goldredMiddle IS NOT NULL
-UNION ALL
-SELECT
-ll.address AS Address,
-    ll.year,
-    ll.Season,
-    ll.redADCChamp as champ,
-    ll.redADC AS Player,
-    ll.goldredADC AS GoldEarned
-FROM
-    leagueoflegends ll
-WHERE
-    ll.redADC IS NOT NULL
-    AND ll.goldredADC IS NOT NULL
-UNION ALL
-SELECT
-ll.address AS Address,
-    ll.year,
-    ll.Season,
-    ll.redSupportChamp as champ,
-    ll.redSupport AS Player,
-    ll.goldredSupport AS GoldEarned
-FROM
-    leagueoflegends ll
-WHERE
-    ll.redSupport IS NOT NULL
-    AND ll.goldredSupport IS NOT NULL;
-```
-## player_champion_role_data.sql
-```sql
-CREATE VIEW player_champion_role_data AS 
-    SELECT
-        ll.address AS Address,
-        ll.year,
-        ll.season AS Season, 
-        ll.blueTop AS Player,
-        ll.bluetopchamp AS Champion, 
-        'Top' AS Role
-    FROM
-        leagueoflegends ll
-    WHERE
-        ll.blueTop IS NOT NULL AND ll.blueTopChamp IS NOT NULL
-    UNION ALL
-    SELECT
-        ll.address AS Address,
-        ll.year,
-        ll.season AS Season,
-        ll.blueJungle AS Player,
-        ll.blueJungleChamp AS Champion,
-        'Jungle' AS Role
-    FROM
-        leagueoflegends ll
-    WHERE
-        ll.blueJungle IS NOT NULL AND ll.blueJungleChamp IS NOT NULL
-    UNION ALL
-    SELECT
-        ll.address AS Address,
-        ll.year,
-        ll.season AS Season,
-        ll.blueMiddle AS Player,
-        ll.blueMiddleChamp AS Champion,
-        'Middle' AS Role
-    FROM
-        leagueoflegends ll
-    WHERE
-        ll.blueMiddle IS NOT NULL AND ll.blueMiddleChamp IS NOT NULL
-    UNION ALL
-    SELECT
-        ll.address AS Address,
-        ll.year,
-        ll.season AS Season,
-        ll.blueADC AS Player,
-        ll.blueADCChamp AS Champion,
-        'ADC' AS Role
-    FROM
-        leagueoflegends ll
-    WHERE
-        ll.blueADC IS NOT NULL AND ll.blueADCChamp IS NOT NULL
-    UNION ALL
-    SELECT
-        ll.address AS Address,
-        ll.year,
-        ll.season AS Season,
-        ll.blueSupport AS Player,
-        ll.blueSupportChamp AS Champion,
-        'Support' AS Role
-    FROM
-        leagueoflegends ll
-    WHERE
-        ll.blueSupport IS NOT NULL AND ll.blueSupportChamp IS NOT NULL
-    UNION ALL
-    SELECT
-        ll.address AS Address,
-        ll.year,
-        ll.season AS Season,
-        ll.redTop AS Player,
-        ll.redTopChamp AS Champion,
-        'Top' AS Role
-    FROM
-        leagueoflegends ll
-    WHERE
-        ll.redTop IS NOT NULL AND ll.redTopChamp IS NOT NULL
-    UNION ALL
-    SELECT
-        ll.address AS Address,
-        ll.year,
-        ll.season AS Season,
-        ll.redJungle AS Player,
-        ll.redJungleChamp AS Champion,
-        'Jungle' AS Role
-    FROM
-        leagueoflegends ll
-    WHERE
-        ll.redJungle IS NOT NULL AND ll.redJungleChamp IS NOT NULL
-    UNION ALL
-    SELECT
-        ll.address AS Address,
-        ll.year,
-        ll.season AS Season,
-        ll.redMiddle AS Player,
-        ll.redMiddleChamp AS Champion,
-        'Middle' AS Role
-    FROM
-        leagueoflegends ll
-    WHERE
-        ll.redMiddle IS NOT NULL AND ll.redMiddleChamp IS NOT NULL
-    UNION ALL
-    SELECT
-        ll.address AS Address,
-        ll.year,
-        ll.season AS Season,
-        ll.redADC AS Player,
-        ll.redADCChamp AS Champion,
-        'ADC' AS Role
-    FROM
-        leagueoflegends ll
-    WHERE
-        ll.redADC IS NOT NULL AND ll.redADCChamp IS NOT NULL
-    UNION ALL
-    SELECT
-        ll.address AS Address,
-        ll.year,
-        ll.season AS Season,
-        ll.redSupport AS Player,
-        ll.redSupportChamp AS Champion,
-        'Support' AS Role
-    FROM
-        leagueoflegends ll
-    WHERE
-        ll.redSupport IS NOT NULL AND ll.redSupportChamp IS NOT NULL
-
-```
-## ban_list.sql
-```sql
-CREATE VIEW ban_list as select 
-    address,
-    team as team,
-    ban_1 as bans,
-    1 as ban_order
-From bans
-UNION ALL
-select 
-    address,
-    team as team,
-    ban_2 as bans,
-    2 as ban_order
-From bans
-UNION ALL
-select 
-    address,
-    team as team,
-    ban_3 as bans,
-    3 as ban_order
-From bans
-UNION ALL
-select 
-    address,
-    team as team,
-    ban_4 as bans,
-    4 as ban_order
-From bans
-UNION ALL
-select 
-    address,
-    team as team,
-    ban_5 as bans,
-    5 as ban_order
-From bans
-
-```
+- ***Complex Query Construction***: I built intricate queries using `WITH` clauses (CTEs) to break down complex problems, employed `UNION ALL` for seamless data aggregation, and leveraged window functions like `ROW_NUMBER()` and `LAG()` for sequential analysis, which was crucial for tracking changes over time (like gold earned per minute).
+- ***Data Transformation***: I mastered string manipulation functions such as `substring`, `replace`, `trim`, and `string_to_array`. This allowed me to clean and prepare raw data for analysis, transforming messy inputs into structured information ready for querying.
+- ***Insightful Aggregations***: I effectively used `COUNT()`, `SUM`, and `AVG` in conjunction with `GROUP BY` and `OVER (PARTITION BY)` clauses to derive meaningful statistics about win rates, kill frequencies, and player performance.
+- ***Database Optimization with Views***: I gained practical experience in creating and utilizing SQL views. This allowed me to abstract complex queries into simplified virtual tables, making the database more manageable.
+- ***Data Visualization Concepts***: Even when the visualization was handled by a separate tool (like the Python script for map plotting), I gained a strong understanding of how SQL results can be translated into visual insights.
+- ***Understanding Esports Analytics***: Gained a deeper appreciation for the granular data available in esports and how it can be used to dissect game strategy, player performance, and meta shifts.
+  
+Overall, this project significantly enhanced my ability to query, analyze, and interpret large datasets, providing valuable experience in drawing meaningful conclusions from complex structured data.
